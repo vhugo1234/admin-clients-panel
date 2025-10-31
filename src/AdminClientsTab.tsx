@@ -419,6 +419,10 @@ export default function AdminClientsTab() {
   // === UI ===
   return (
     <Box sx={{ p: { xs: 1, sm: 3 }, bgcolor: darkMode ? '#171717' : 'background.default', minHeight: '100vh', transition: '.2s' }}>
+      {/* Título da Página */}
+      <Typography variant="h4" sx={{ fontWeight: 700, mb: 3, color: darkMode ? '#fff' : 'text.primary' }}>
+        Painel de Administração de Clientes
+      </Typography>
       {/* Totais e filtros */}
       <Grid container spacing={2} sx={{ mb: 2 }}>
         <Grid item xs={6} sm={3}><Chip label={`Clientes: ${totalClients}`} color="primary" sx={{ fontWeight: 700, fontSize: '1.15rem', py: 1, px: 2 }}/></Grid>
