@@ -1,4 +1,3 @@
-import React from 'react';
 import { ThemeProvider, createTheme, CssBaseline } from '@mui/material';
 import { AuthProvider } from './contexts/AuthContext';
 import AdminClientsTab from './AdminClientsTab';

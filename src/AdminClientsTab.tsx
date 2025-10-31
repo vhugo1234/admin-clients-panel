@@ -7,7 +7,7 @@ import {
   Box, Typography, Button, Table, TableHead, TableRow, TableCell,
   TableBody, Dialog, TextField, Stack, MenuItem, Chip, Tooltip,
   CircularProgress, Alert, IconButton, Divider, Snackbar,
-  TablePagination, TableSortLabel, TableContainer, Fade, useTheme,
+  TablePagination, TableContainer, Fade, useTheme,
   useMediaQuery, Grid, Paper, Zoom, Avatar, InputAdornment
 } from '@mui/material';
 import {
@@ -144,7 +144,8 @@ const LogsModal: React.FC<{ open: boolean, onClose: () => void, client: TenantCl
 export default function AdminClientsTab() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const { token, loading: authLoading, isSuperuser, logout } = useAuth();
+  // Auth context - ready for authentication integration
+  const { token: _token, loading: _authLoading, isSuperuser: _isSuperuser, logout: _logout } = useAuth();
 
   // States
   const [clients, setClients] = useState<TenantClient[]>([]);
@@ -161,8 +162,9 @@ export default function AdminClientsTab() {
   const [loadingLogs, setLoadingLogs] = useState(false);
   const [openLogoZoom, setOpenLogoZoom] = useState(false);
   const [logoZoomUrl, setLogoZoomUrl] = useState<string | null>(null);
-  const [order, setOrder] = useState<'asc' | 'desc'>('asc');
-  const [orderBy, setOrderBy] = useState<keyof TenantClient | 'actions'>('id');
+  // Sorting states - ready for future table header sorting implementation
+  const [order, _setOrder] = useState<'asc' | 'desc'>('asc');
+  const [orderBy, _setOrderBy] = useState<keyof TenantClient | 'actions'>('id');
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -215,15 +217,15 @@ export default function AdminClientsTab() {
         created_at: c.created_at || c.data_criacao || new Date().toISOString(),
         responsible_name: c.responsible_name || '',
         responsible_email: c.responsible_email || '',
-        responsible_phone: c.responsible_phone ?? null, 
+        responsible_phone: c.responsible_phone ?? null,
         plan_type: c.plan_type || c.plano || '',
         plan_expires_at: c.plan_expires_at || null,
         users_total: c.users_total ?? 0,
         assets_total: c.assets_total ?? 0,
         last_access: c.last_access || new Date().toISOString(),
-        logo_url: c.logo_url || null, 
+        logo_url: c.logo_url || null,
         dominio_url: c.dominio_url || null,
-      }));
+      })));
     } catch (err: any) {
       setError(err?.response?.data?.detail || err.message || 'Falha ao carregar a lista de clientes.');
       setSnackbarMessage('Falha ao carregar a lista de clientes.');
@@ -247,10 +249,6 @@ export default function AdminClientsTab() {
     setSelectedLogoFile(null);
     setAdminTempPassword(null);
     setCopiedPwd(false);
-  };
-  const handleRequestSort = (property: keyof TenantClient | 'actions') => {
-    const isAsc = orderBy === property && order === 'asc';
-    setOrder(isAsc ? 'desc' : 'asc'); setOrderBy(property);
   };
   const handleChangePage = (_: unknown, newPage: number) => setPage(newPage);
   const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => { setRowsPerPage(parseInt(event.target.value, 10)); setPage(0); };
@@ -486,6 +484,12 @@ export default function AdminClientsTab() {
       {/* Tabela */}
       <Paper elevation={isMobile ? 0 : 3} sx={{ p: { xs: 2, sm: 3 }, borderRadius: 4, mb: 2, bgcolor: darkMode ? '#222' : 'background.paper' }}>
         {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+        {loading ? (
+          <Box display="flex" justifyContent="center" alignItems="center" py={8}>
+            <CircularProgress size={60} />
+          </Box>
+        ) : (
+        <>
         <TableContainer>
           <Table sx={{ minWidth: isMobile ? 360 : 1200 }}>
             <TableHead>
@@ -622,6 +626,8 @@ export default function AdminClientsTab() {
             '.MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows': { fontSize: isMobile ? '0.85rem' : '1rem', },
           }}
         />
+        </>
+        )}
       </Paper>
       {/* Modal de Criação/Edição de Cliente */}
       <Dialog
