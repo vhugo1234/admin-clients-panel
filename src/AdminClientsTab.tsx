@@ -1,6 +1,6 @@
-// Arquivo completíssimo: AdminClientsTab.tsx
-// Inclui busca global, filtros, cards de totais, dark mode, exportação CSV, ações, modais, preview de logo, copy senha, logs, responsividade e UX premium.
-// Cole dentro de src/AdminClientsTab.tsx
+// Complete admin clients panel component
+// Includes: global search, filters, summary cards, dark mode, CSV export, actions, modals, logo preview, password copy, logs, responsiveness and premium UX.
+// This file should be placed in src/AdminClientsTab.tsx
 
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import {
