@@ -14,9 +14,9 @@ import {
   Add, Edit, Delete, FormatListNumbered, PhotoCamera, Close, Public,
   ContentCopy, InfoOutlined, Search, FileDownload, LightMode, DarkMode
 } from '@mui/icons-material';
-import api from '../lib/api';
-import { useAuth } from '../contexts/AuthContext';
-import { BACKEND_URL } from '../config';
+import api from './lib/api';
+import { useAuth } from './contexts/AuthContext';
+import { BACKEND_URL } from './config';
 
 interface TenantClient {
   id: number;
@@ -342,6 +342,79 @@ export default function AdminClientsTab() {
       setSnackbarOpen(true);
     } finally {
       setSaving(false);
+    }
+  };
+
+  // Export to CSV functionality
+  const handleExportCSV = () => {
+    try {
+      // Prepare CSV headers
+      const headers = [
+        'ID',
+        'Nome',
+        'Schema',
+        'Status',
+        'Plano',
+        'Responsável',
+        'Email Responsável',
+        'Telefone',
+        'Total Usuários',
+        'Total Ativos',
+        'Criado em',
+        'Última Acesso',
+        'Expiração do Plano',
+        'Domínio'
+      ];
+
+      // Prepare CSV rows
+      const rows = filteredClients.map(client => [
+        client.id,
+        client.name,
+        client.schema_name,
+        client.status,
+        client.plan_type || client.tenant_type,
+        client.responsible_name,
+        client.responsible_email,
+        client.responsible_phone || 'N/A',
+        client.users_total,
+        client.assets_total,
+        formatDate(client.created_at),
+        formatDate(client.last_access),
+        formatDate(client.plan_expires_at),
+        client.dominio_url || 'N/A'
+      ]);
+
+      // Build CSV content
+      const csvContent = [
+        headers.join(','),
+        ...rows.map(row => row.map(cell => {
+          // Escape cells that contain commas or quotes
+          const cellStr = String(cell);
+          if (cellStr.includes(',') || cellStr.includes('"') || cellStr.includes('\n')) {
+            return `"${cellStr.replace(/"/g, '""')}"`;
+          }
+          return cellStr;
+        }).join(','))
+      ].join('\n');
+
+      // Create blob and download
+      const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `clientes_${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      setSnackbarMessage(`${filteredClients.length} clientes exportados com sucesso!`);
+      setSnackbarSeverity('success');
+      setSnackbarOpen(true);
+    } catch (error) {
+      setSnackbarMessage('Erro ao exportar CSV.');
+      setSnackbarSeverity('error');
+      setSnackbarOpen(true);
     }
   };
 
